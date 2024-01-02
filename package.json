@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "npx tsc test.ts && node test.js"
+    "build": "npx tsc",
+    "test": "npm run build && node dist/test.js"
   },
   "keywords": [],
   "author": "",
@@ -17,11 +18,12 @@
   "dependencies": {
     "@toruslabs/eccrypto": "^4.0.0",
     "@toruslabs/metadata-helpers": "^5.0.0",
-    "@toruslabs/tss-client": "^2.1.0",
-    "@toruslabs/tss-lib": "^2.0.0",
+    "@toruslabs/tss-client": "^2.0.0",
+    "@toruslabs/tss-lib": "2.0.0",
     "@types/bn.js": "^5.1.5",
     "@types/elliptic": "^6.4.18",
     "bn.js": "^5.2.1",
+    "bn.js-typings": "^1.0.1",
     "cors": "^2.8.5",
     "elliptic": "^6.5.4",
     "express": "^4.18.2"
