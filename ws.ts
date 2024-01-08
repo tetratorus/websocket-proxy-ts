@@ -8,7 +8,7 @@ export type FakeWebSocketOptions = {
   reconnectionAttempts: number;
 };
 export class FakeWebSocket {
-  id = '';
+  id = "";
 
   connected = false;
 
@@ -25,9 +25,9 @@ export class FakeWebSocket {
     this.options = options;
 
     fetch(`${this.endpoint}/getId`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(this.options),
     })
@@ -37,11 +37,12 @@ export class FakeWebSocket {
       .then((json) => {
         this.id = json.id;
         this.connected = true;
+        console.log("THIS CONNECTEd", this.connected, this.id)
         setInterval(() => {
           fetch(`${this.endpoint}/proxy/${this.id}`, {
-            method: 'GET',
+            method: "GET",
             headers: {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
             },
           })
             .then(async (res) => {
@@ -49,13 +50,13 @@ export class FakeWebSocket {
             })
             .then(async (pollingJSON) => {
               if (!pollingJSON.messages) {
-                throw new Error('pollingJSON.messages is undefined');
+                throw new Error("pollingJSON.messages is undefined");
               }
-              console.log('pollingJSON', pollingJSON);
+              console.log("id", this.id, "pollingJSON", pollingJSON);
               if (this.messages.length < pollingJSON.messages.length) {
                 const newMessages = pollingJSON.messages.slice(
                   this.messages.length,
-                  pollingJSON.messages.length,
+                  pollingJSON.messages.length
                 );
                 this.messages = pollingJSON.messages;
                 newMessages.forEach(
@@ -64,12 +65,12 @@ export class FakeWebSocket {
                     args: { [key: string]: any };
                   }) => {
                     this._receive(message.event, message.args);
-                  },
+                  }
                 );
               }
             })
             .catch((error) => {
-              console.error('error', error);
+              console.error("error", error);
             });
         }, 1000);
       })
@@ -86,6 +87,7 @@ export class FakeWebSocket {
   }
 
   on(event: string, callback: (args: { [key: string]: any }) => void) {
+    console.log("ON called", this.id)
     if (Array.isArray(this.listeners[event])) {
       this.listeners[event] = this.listeners[event].push(callback);
     } else {
@@ -94,12 +96,14 @@ export class FakeWebSocket {
   }
 
   off(event: string) {
+    console.log("OFF called", this.id)
     if (this.listeners[event]) {
       this.listeners[event] = [];
     }
   }
 
   _receive(event: string, args: { [key: string]: any }) {
+    console.log("_receive called", this.id)
     if (this.listeners[event]) {
       this.listeners[event].forEach((callback: any) => {
         callback(args);
@@ -108,10 +112,25 @@ export class FakeWebSocket {
   }
 
   emit(event: string, args: { [key: string]: any }) {
-    console.log(`MockWebSocket.emit(${event}) ${JSON.stringify(args)}`);
+    console.log("WHAT IS THE EMITTING EVENT ARGS", event, args);
+    
+    fetch(`${this.endpoint}/emit/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: this.id,
+          event,
+          args,
+        }),
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+    // console.log(`MockWebSocket.emit(${event}) ${JSON.stringify(args)}`);
   }
 }
-
 
 // setupSockets([
 //   'http://localhost:9001/','http://localhost:9001','http://localhost:9001','http://localhost:9001','http://localhost:9001',
